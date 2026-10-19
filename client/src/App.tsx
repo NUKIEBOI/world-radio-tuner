@@ -105,6 +105,9 @@ export function App() {
   const [countrySearch, setCountrySearch] = useState("");
   const [stationSearch, setStationSearch] = useState("");
   const [view, setView] = useState<PanelView>(null);
+  // Top-level pages, Radio Garden-style: Explore (the globe) and a
+  // dedicated Favorites page.
+  const [page, setPage] = useState<"explore" | "favorites">("explore");
 
   // ---------- station panel data ----------
   const panelCountryCode =
@@ -374,6 +377,17 @@ export function App() {
     }
   };
 
+  const shuffleFavorites = () => {
+    const playable = favorites.filter(
+      (s) => !failedRef.current.has(s.uuid),
+    );
+    if (playable.length === 0) return;
+    const pick =
+      playable[Math.floor(Math.random() * playable.length)] ??
+      playable[0];
+    if (pick) startStation(pick, favorites);
+  };
+
   const shufflePanel = () => {
     const playable = panelStations.filter(
       (s) => !failedRef.current.has(s.uuid),
@@ -469,7 +483,7 @@ export function App() {
               <span className="mono block text-[11px] text-[var(--dim)]">
                 {station.codec}
                 {station.bitrate > 0 ? ` ${station.bitrate} kbps` : ""} ·{" "}
-                {station.https ? "https" : "http"} · ★ {station.votes}
+                {station.https ? "https" : "http"} · {station.votes} votes
               </span>
             </span>
           </button>
@@ -484,11 +498,11 @@ export function App() {
                 : `Save ${station.name} to favorites`
             }
             aria-pressed={isFav}
-            className={`px-3 text-lg ${
+            className={`px-3 text-xl ${
               isFav ? "text-[var(--accent)]" : "text-[var(--dim)]"
             }`}
           >
-            {isFav ? "★" : "☆"}
+            {isFav ? "♥" : "♡"}
           </button>
         </div>
       </li>
@@ -498,10 +512,68 @@ export function App() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <SafeAreaTopScrim backgroundColor="var(--bg)" />
+      <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]">
+        <nav
+          aria-label="Main"
+          className="mx-auto flex w-full max-w-5xl items-center gap-1 px-4 py-2.5"
+        >
+          <button
+            type="button"
+            onClick={() => setPage("explore")}
+            aria-pressed={page === "explore"}
+            className={`rounded-full px-4 py-2 text-sm font-medium ${
+              page === "explore"
+                ? "bg-[var(--surface-alt)] text-[var(--text)]"
+                : "text-[var(--dim)]"
+            }`}
+          >
+            <span aria-hidden className="mr-1.5 text-[var(--accent)]">
+              ●
+            </span>
+            Explore
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage("favorites")}
+            aria-pressed={page === "favorites"}
+            className={`rounded-full px-4 py-2 text-sm font-medium ${
+              page === "favorites"
+                ? "bg-[var(--surface-alt)] text-[var(--text)]"
+                : "text-[var(--dim)]"
+            }`}
+          >
+            <span
+              aria-hidden
+              className={
+                favorites.length > 0
+                  ? "mr-1.5 text-[var(--accent)]"
+                  : "mr-1.5"
+              }
+            >
+              ♥
+            </span>
+            Favorites
+            {favorites.length > 0 && (
+              <span className="mono ml-1.5 text-xs text-[var(--dim)]">
+                {favorites.length}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => refreshMut.mutate()}
+            disabled={refreshMut.isPending}
+            aria-label="Refresh the station directory"
+            className="mono ml-auto rounded-full border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--dim)] disabled:opacity-50"
+          >
+            {refreshMut.isPending ? "Refreshing…" : "↻ Refresh"}
+          </button>
+        </nav>
+      </header>
       <main className="mx-auto w-full max-w-5xl px-4 pb-44">
         {/* Status strip */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-5 pb-3">
-          <p className="text-sm">
+        {page === "explore" && (
+          <p className="pt-5 pb-3 text-sm text-[var(--dim)]">
             {countriesQuery.isPending ? (
               "Loading the world of radio…"
             ) : countries.length > 0 ? (
@@ -519,17 +591,9 @@ export function App() {
               "The station directory could not be loaded"
             )}
           </p>
-          <button
-            type="button"
-            onClick={() => refreshMut.mutate()}
-            disabled={refreshMut.isPending}
-            className="mono ml-auto rounded border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-          >
-            {refreshMut.isPending ? "Refreshing…" : "↻ Refresh directory"}
-          </button>
-        </div>
+        )}
 
-        {countriesError && countries.length > 0 && (
+        {page === "explore" && countriesError && countries.length > 0 && (
           <p className="mb-3 rounded border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--dim)]">
             Last refresh failed ({countriesError}) — showing the directory
             as of{" "}
@@ -540,7 +604,9 @@ export function App() {
           </p>
         )}
 
-        {countriesQuery.isSuccess && countries.length === 0 && (
+        {page === "explore" &&
+          countriesQuery.isSuccess &&
+          countries.length === 0 && (
           <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-10 text-center">
             <p className="text-base font-medium">
               The station directory did not answer
@@ -560,7 +626,7 @@ export function App() {
           </div>
         )}
 
-        {countries.length > 0 && (
+        {page === "explore" && countries.length > 0 && (
           <>
             {/* Globe */}
             {globeAvailable ? (
@@ -597,11 +663,11 @@ export function App() {
                 onChange={(e) => setStationSearch(e.target.value)}
                 placeholder="Search stations worldwide — try “samba”, “jazz”, a station name…"
                 aria-label="Search stations by name"
-                className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm"
+                className="min-w-0 flex-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm"
               />
               <button
                 type="submit"
-                className="mono rounded bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--accent-ink)]"
+                className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-[var(--accent-ink)]"
               >
                 Search
               </button>
@@ -643,7 +709,7 @@ export function App() {
                         type="button"
                         onClick={shufflePanel}
                         disabled={panelStations.length === 0}
-                        className="mono rounded bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-ink)] disabled:opacity-40"
+                        className="mono rounded-full bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-ink)] disabled:opacity-40"
                       >
                         ⤨ Surprise me
                       </button>
@@ -736,16 +802,6 @@ export function App() {
               )}
             </section>
 
-            {/* Favorites */}
-            {favorites.length > 0 && (
-              <section aria-label="Favorite stations" className="mt-8">
-                <h2 className="text-lg font-semibold">Your favorites</h2>
-                <ul className="mt-3 divide-y divide-[var(--border)] rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]">
-                  {favorites.map((s) => renderStationRow(s, favorites))}
-                </ul>
-              </section>
-            )}
-
             {/* Country browser */}
             <section aria-label="Browse countries" className="mt-8">
               <h2 className="text-lg font-semibold">Every country</h2>
@@ -755,7 +811,7 @@ export function App() {
                 onChange={(e) => setCountrySearch(e.target.value)}
                 placeholder="Find a country…"
                 aria-label="Find a country"
-                className="mt-3 w-full rounded border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm"
+                className="mt-3 w-full rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm"
               />
               <p className="mono mt-3 text-xs text-[var(--dim)]">
                 Showing {Math.min(filteredCountries.length, 80)} of{" "}
@@ -795,6 +851,62 @@ export function App() {
               </ul>
             </section>
           </>
+        )}
+
+        {/* Favorites page — mirrors radio.garden/favorites: a big
+            heading, the "save your favorite stations" line, then the
+            saved stations as a simple list. */}
+        {page === "favorites" && (
+          <section aria-label="Favorites" className="pt-6">
+            <h1 className="text-3xl font-semibold">Favorites</h1>
+            <p className="mt-2 max-w-lg text-sm text-[var(--dim)]">
+              Save your favorite stations here. You can add a station to
+              your Favorites by tapping on the heart icon.
+            </p>
+            {favoritesQuery.isPending ? (
+              <p className="py-10 text-center text-sm text-[var(--dim)]">
+                Loading your favorites…
+              </p>
+            ) : favorites.length === 0 ? (
+              <div className="mt-8 rounded-[var(--radius)] border border-dashed border-[var(--border)] px-4 py-10 text-center">
+                <p aria-hidden className="text-4xl text-[var(--dim)]">
+                  ♡
+                </p>
+                <p className="mt-3 font-medium">No favorites yet</p>
+                <p className="mx-auto mt-1 max-w-md text-sm text-[var(--dim)]">
+                  Spin the globe, find a station you love, and tap its
+                  heart — it will wait for you here.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setPage("explore")}
+                  className="mt-4 rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-[var(--accent-ink)]"
+                >
+                  Explore the globe
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="mt-6 flex items-center gap-3">
+                  <h2 className="text-lg font-semibold">Stations</h2>
+                  <span className="mono text-xs text-[var(--dim)]">
+                    {favorites.length}{" "}
+                    {favorites.length === 1 ? "station" : "stations"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={shuffleFavorites}
+                    className="mono ml-auto rounded-full bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-ink)]"
+                  >
+                    ⤨ Play a favorite
+                  </button>
+                </div>
+                <ul className="mt-3 divide-y divide-[var(--border)] rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]">
+                  {favorites.map((s) => renderStationRow(s, favorites))}
+                </ul>
+              </>
+            )}
+          </section>
         )}
 
         <footer className="mt-10 border-t border-[var(--border)] pt-4 text-xs text-[var(--dim)]">
@@ -907,13 +1019,13 @@ export function App() {
                     : `Save ${current.name} to favorites`
                 }
                 aria-pressed={favoriteUuids.has(current.uuid)}
-                className={`shrink-0 px-1 text-xl ${
+                className={`shrink-0 px-1 text-2xl ${
                   favoriteUuids.has(current.uuid)
                     ? "text-[var(--accent)]"
                     : "text-[var(--dim)]"
                 }`}
               >
-                {favoriteUuids.has(current.uuid) ? "★" : "☆"}
+                {favoriteUuids.has(current.uuid) ? "♥" : "♡"}
               </button>
             </div>
             <div className="mt-2 flex items-center gap-3">

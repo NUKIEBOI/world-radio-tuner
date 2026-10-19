@@ -93,9 +93,7 @@ export function GlobeMap({
       handleRef.current = api.mountMap(container, {
         places,
         globe: true,
-        baseStyle: window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light",
+        baseStyle: "dark",
         clientId: "artifact_web",
         onFatalError: () => unavailableRef.current(),
         onSelectPlace: (index: number | null) => selectRef.current(index),
@@ -118,7 +116,7 @@ export function GlobeMap({
   return (
     <div
       ref={containerRef}
-      className="h-[340px] w-full overflow-hidden rounded-[var(--radius)] border border-[var(--border)] sm:h-[440px]"
+      className="h-[400px] w-full overflow-hidden rounded-[var(--radius)] border border-[var(--border)] sm:h-[540px]"
       role="img"
       aria-label="Globe of the earth with a dot for every country that has radio stations — drag to spin it, tap a dot to hear that country"
     />

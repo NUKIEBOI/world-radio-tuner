@@ -118,8 +118,6 @@ function normalizeStation(row: RbStation): StationOut | null {
   const name = str(row.name);
   const streamUrl = str(row.url_resolved) || str(row.url);
   if (!uuid || !name || !streamUrl) return null;
-  // HLS streams (.m3u8) need a special player; plain MP3/AAC/OGG streams
-  // play directly in the browser, so HLS entries are left out.
   if (num(row.hls) === 1 || streamUrl.includes(".m3u8")) return null;
   const tags = str(row.tags)
     .split(",")
@@ -143,8 +141,6 @@ function normalizeStation(row: RbStation): StationOut | null {
   };
 }
 
-// HTTPS streams first (an https page cannot play http:// audio — the
-// browser blocks it as mixed content), then by community votes.
 function rankStations(stations: StationOut[]): StationOut[] {
   return [...stations].sort((a, b) => {
     if (a.https !== b.https) return a.https ? -1 : 1;
@@ -216,8 +212,6 @@ const toggleStationFavoriteRequest = z.object({
   station: z.object(stationSnapshot),
 });
 
-// Country list with live station counts. Cached in the DB for 6 hours;
-// a failed refresh keeps serving the last good snapshot and says so.
 async function getCountries(
   args: z.infer<typeof getCountriesRequest>,
 ): Promise<z.infer<typeof countriesResponse>> {
@@ -279,7 +273,6 @@ async function getCountries(
   }
 }
 
-// Top stations for one country, optionally narrowed to one genre tag.
 async function getStations(
   args: z.infer<typeof getStationsRequest>,
 ): Promise<z.infer<typeof stationsResponse>> {
@@ -299,7 +292,6 @@ async function getStations(
   }
 }
 
-// Free-text station search across every country.
 async function searchStations(
   args: z.infer<typeof searchStationsRequest>,
 ): Promise<z.infer<typeof stationsResponse>> {

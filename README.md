@@ -25,14 +25,18 @@ cache live in `tuner.db` (SQLite, created automatically).
 
 ## What it does
 
-- **Spinning globe** — drag the earth, tap a country's dot to open it.
+- **Spinning globe** — dark, Radio Garden-style earth. Drag to spin it,
+  tap a country's glowing dot to open its stations.
 - **Live station directory** — data from [Radio Browser](https://www.radio-browser.info/),
   the free community-run index of internet radio (~55,000 working stations
-  across ~200 countries). Top stations per country by community votes,
+  across 242 countries). Top stations per country by community votes,
   filterable by genre, plus worldwide search and a "Surprise me" shuffle.
 - **In-page player** — streams play straight from each station's own
-  server to your browser. Dead streams are skipped automatically.
-- **Favorites** — star stations; they persist in the local SQLite DB.
+  server to your browser. HTTPS streams rank first, dead streams are
+  skipped automatically, ⏮/⏭ step through the list.
+- **Favorites page** — tap the heart (♡) on any station or in the player
+  bar; your favorites persist in the local SQLite DB, with a
+  "Play a favorite" shuffle.
 
 ## How it's built
 
@@ -45,7 +49,7 @@ cache live in `tuner.db` (SQLite, created automatically).
 
 | Path | What it is |
 |---|---|
-| `client/src/` | React frontend (globe, station panel, player, search) |
+| `client/src/` | React frontend (globe, station panel, player, search, favorites) |
 | `client/src/geo.ts` | Country names + centroid coordinates for the globe |
 | `server/standalone.ts` | HTTP server: API routes + static file serving |
 | `server/actions.ts` | Action implementations (Radio Browser directory logic) |

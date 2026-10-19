@@ -23,19 +23,21 @@
 }
 
 :root {
-  color-scheme: light dark;
-  /* Light mode: warm bench-paper, amber kept dark enough to read. */
-  --bg: #f3efe6;
-  --surface: #fffdf6;
-  --surface-alt: #ece7d9;
-  --text: #211c12;
-  --dim: #6f6753;
-  --border: #d9d2bf;
-  --accent: #a86e06;
-  --accent-ink: #ffffff;
-  --signal: #1d8a4c;
-  --full: #c2452f;
-  --radius: 10px;
+  /* Radio Garden-style scene, dark in both system modes like the
+     reference: deep green-black night, soft translucent-feeling
+     surfaces, one bright garden-green accent. */
+  color-scheme: dark;
+  --bg: #0a0d0b;
+  --surface: #141815;
+  --surface-alt: #1e2420;
+  --text: #eef3ee;
+  --dim: #94a698;
+  --border: #242c26;
+  --accent: #34d17b;
+  --accent-ink: #04140a;
+  --signal: #34d17b;
+  --full: #e0655a;
+  --radius: 14px;
   --space-surface: var(--surface);
   --space-surface-alt: var(--surface-alt);
   --space-muted: var(--dim);
@@ -45,16 +47,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Dark mode: the primary design — a radio dial glowing at night. */
-    --bg: #0c0e11;
-    --surface: #14161a;
-    --surface-alt: #1b1e24;
-    --text: #e8e4da;
-    --dim: #9a958a;
-    --border: #262a30;
-    --accent: #f0a832;
-    --accent-ink: #191204;
-    --signal: #57d977;
+    --bg: #0a0d0b;
+    --surface: #141815;
+    --surface-alt: #1e2420;
+    --text: #eef3ee;
+    --dim: #94a698;
+    --border: #242c26;
+    --accent: #34d17b;
+    --accent-ink: #04140a;
+    --signal: #34d17b;
     --full: #e0655a;
   }
 }
