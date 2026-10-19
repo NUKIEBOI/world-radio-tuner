@@ -35,16 +35,10 @@ receivers their owners share publicly.
 | `server/src/schema.ts` | Drizzle schema |
 | `drizzle/` | SQL migrations |
 
-## Run it locally
+## About this repo
 
-1. Install Bun: https://bun.sh
-2. Then:
-
-```bash
-bun install
-bun run dev
-```
-
-Then open the localhost link it prints (usually http://localhost:3000).
-
-(Built with the Muse web-artifact runtime; `space.json` describes the deployment.)
+This repo holds the complete source of the World Radio Tuner. The app itself
+runs on the hosted Muse artifact runtime (open it from the shared card) — it
+depends on the internal `@hatch/space-sdk` package, so it can't be installed
+and run with a plain `bun install` outside that environment. Clone it to read
+the code, hack on the presets in `client/src/presets.ts`, or port it.
