@@ -1,47 +1,28 @@
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-// Cached snapshot of the public KiwiSDR / WebSDR receiver directory.
-// Rows are replaced wholesale by the refreshReceivers action; this is a
-// cache of a public feed, never user data.
-export const receivers = sqliteTable("receivers", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  location: text("location").notNull(),
-  url: text("url").notNull(),
-  lat: real("lat").notNull(),
-  lon: real("lon").notNull(),
-  users: integer("users"),
-  usersMax: integer("users_max"),
-  antenna: text("antenna").notNull(),
-  bands: text("bands").notNull(),
-  type: text("type", { enum: ["KiwiSDR", "WebSDR"] }).notNull(),
-});
-
-// Key/value store for directory bookkeeping (fetched_at, last_error).
+// Key/value store for directory bookkeeping (countries cache, fetched_at,
+// last_error). The countries JSON snapshot is a cache of a public feed
+// (Radio Browser), never user data.
 export const directoryMeta = sqliteTable("directory_meta", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
 });
 
-// Receivers the user starred.
-export const favorites = sqliteTable("favorites", {
-  receiverId: text("receiver_id").primaryKey(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-// The user's own listening log ("record what you catch"). Starts empty;
-// rows exist only when the user adds them.
-export const logEntries = sqliteTable("log_entries", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  station: text("station").notNull(),
-  freqKhz: real("freq_khz").notNull(),
-  mode: text("mode").notNull(),
-  receiverName: text("receiver_name").notNull(),
-  listenedAt: integer("listened_at", { mode: "timestamp_ms" }).notNull(),
-  notes: text("notes").notNull(),
-  rating: integer("rating"),
+// Stations the user starred. Stores a snapshot of the station's Radio
+// Browser fields (including the stream URL) so favorites keep working
+// even before any directory fetch. Rows exist only when the user stars
+// a station.
+export const stationFavorites = sqliteTable("station_favorites", {
+  uuid: text("uuid").primaryKey(),
+  name: text("name").notNull(),
+  streamUrl: text("stream_url").notNull(),
+  homepage: text("homepage").notNull(),
+  country: text("country").notNull(),
+  countryCode: text("country_code").notNull(),
+  state: text("state").notNull(),
+  tags: text("tags").notNull(),
+  codec: text("codec").notNull(),
+  bitrate: integer("bitrate").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

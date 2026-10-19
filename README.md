@@ -1,37 +1,37 @@
 # World Radio Tuner
 
-**A DXer's command center for shortwave radio.** Tune public KiwiSDR receivers
-around the world, jump to famous stations with one click, and log your catches
-in a UTC logbook — no radio hardware required.
+**Spin the earth, hear the planet.** A Radio Garden–style globe of live
+internet radio: drag the world around, tap a country, and listen to its
+music stations right in the page — no radio hardware, no new tabs.
 
 This is a full-stack TypeScript app (React + Drizzle + SQLite). The live app
 runs on the hosted artifact runtime; this repo holds the complete source.
 
 ## What it does
 
-- **Live receiver directory** — pulls the real public KiwiSDR listing
-  (~886 receivers worldwide at last fetch), plotted on a world map and sorted
-  by distance from your location, with search, region, free-slot, and
-  favorites filters. Auto-refreshes when the snapshot goes stale.
-- **Tuning console** — pick a receiver, dial any frequency + mode, and open it
-  in a new tab already tuned via the KiwiSDR `?f=<kHz><mode>` deep link.
-- **Preset deck** — one-click tuning for the classics: The Buzzer (4625 kHz),
-  The Pip, The Squeaky Wheel, HFGCS, Shannon/RAF VOLMET, North Atlantic ATC,
-  WWV, CHU, the 20m/40m ham bands, and the 49m broadcast band. "Tune it" picks
-  the least-loaded receiver in the signal's home region.
-- **Logbook** — record catches (station, frequency, receiver, UTC time, signal
-  rating, notes) with full edit/delete. Starts empty, ready for your first catch.
-
-Everything is receive-only: listening to signals broadcast in the clear on
-receivers their owners share publicly.
+- **Spinning globe** — an interactive globe (Meta map runtime, globe
+  projection) with a dot for every country that has stations. Drag to turn
+  the earth, tap a dot to open that country.
+- **Live station directory** — station data comes from
+  [Radio Browser](https://www.radio-browser.info/), the free community-run
+  index of internet radio (~55,000 working stations across ~200 countries).
+  Per country you get its top stations by community votes, filterable by
+  genre (pop, rock, jazz, classical, electronic, latin, folk…), plus a
+  worldwide station search.
+- **In-page player** — streams play directly from each station's own server
+  to your browser. HTTPS streams are ranked first (secure pages can't play
+  plain-http audio), dead streams are skipped automatically, and ⏮/⏭ step
+  through the list. "Surprise me" shuffles a random station from the
+  country you're browsing.
+- **Favorites** — star stations and they stay one tap away.
 
 ## Project layout
 
 | Path | What it is |
 |---|---|
-| `client/src/` | React frontend (tuner console, map, presets, logbook) |
-| `client/src/presets.ts` | The preset station library |
-| `server/src/actions.ts` | Server actions (receiver directory refresh, logbook CRUD) |
+| `client/src/` | React frontend (globe, country browser, station panel, player) |
+| `client/src/geo.ts` | Country names + centroid coordinates (mledoze/countries dataset), joined with the live directory by ISO code |
+| `server/src/actions.ts` | Server actions (Radio Browser directory fetch + cache, station lists, search, favorites) |
 | `server/src/schema.ts` | Drizzle schema |
 | `drizzle/` | SQL migrations |
 
@@ -41,4 +41,4 @@ This repo holds the complete source of the World Radio Tuner. The app itself
 runs on the hosted Muse artifact runtime (open it from the shared card) — it
 depends on the internal `@hatch/space-sdk` package, so it can't be installed
 and run with a plain `bun install` outside that environment. Clone it to read
-the code, hack on the presets in `client/src/presets.ts`, or port it.
+the code or port it.
