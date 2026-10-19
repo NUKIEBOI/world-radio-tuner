@@ -37,9 +37,14 @@ receivers their owners share publicly.
 
 ## Run it locally
 
+1. Install Bun: https://bun.sh
+2. Then:
+
 ```bash
 bun install
 bun run dev
 ```
+
+Then open the localhost link it prints (usually http://localhost:3000).
 
 (Built with the Muse web-artifact runtime; `space.json` describes the deployment.)
