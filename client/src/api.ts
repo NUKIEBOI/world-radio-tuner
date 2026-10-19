@@ -1,20 +1,50 @@
-// Typed RPC client. Types come straight from `server/src/actions.ts` — no
-// codegen. `createActionClient` returns a proxy that POSTs `{action, args}`
-// to `./actions` and returns the typed response.
+// Typed RPC client for the standalone server. Mirrors the hosted artifact's
+// action-client surface: `api.getCountries({})`, `api.getStations(args)`, etc.
+// Each call POSTs JSON to /api/<action> and returns the parsed response.
 //
-// `import type { Actions }` is type-only by design: the client bundle never
-// pulls in any server runtime (bun:sqlite, file APIs, etc.). With
-// `verbatimModuleSyntax: true`, dropping `type` is a compile error.
+// `import type` of the server actions is type-only by design: the client
+// bundle never pulls in any server runtime (bun:sqlite, file APIs, etc.).
 
-import type { Actions } from "../../server/src/actions";
-import { createActionClient } from "@hatch/space-sdk/client";
+import type {
+  ActionName,
+  ActionRequest,
+  ActionResponse,
+} from "../../server/actions";
 
-export const api = createActionClient<typeof Actions>();
+async function callAction<N extends ActionName>(
+  name: N,
+  args: ActionRequest<N>,
+): Promise<ActionResponse<N>> {
+  const res = await fetch(`/api/${name}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(args ?? {}),
+  });
+  const data: unknown = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message =
+      typeof data === "object" && data !== null && "error" in data
+        ? String((data as { error: unknown }).error)
+        : `request failed: HTTP ${res.status}`;
+    throw new Error(message);
+  }
+  return data as ActionResponse<N>;
+}
 
-// Re-exported for convenience so client code can do
-//
-//     import { api, type ApiResponse } from "./api";
-//     type Article = ApiResponse<typeof api, "listArticles">["articles"][number];
-//
-// They are also available directly from "@hatch/space-sdk/client".
-export type { ApiRequest, ApiResponse } from "@hatch/space-sdk/client";
+export type Api = {
+  [N in ActionName]: (args: ActionRequest<N>) => Promise<ActionResponse<N>>;
+};
+
+export const api = new Proxy({} as Api, {
+  get:
+    (_target, name: string) =>
+    (args: unknown): Promise<unknown> =>
+      callAction(name as ActionName, args as never),
+});
+
+// Convenience types matching the old SDK surface used across the app:
+// ApiResponse<typeof api, "getCountries">, ApiRequest<typeof api, "getStations">.
+export type ApiRequest<_A extends Api, N extends ActionName> =
+  ActionRequest<N>;
+export type ApiResponse<_A extends Api, N extends ActionName> =
+  ActionResponse<N>;

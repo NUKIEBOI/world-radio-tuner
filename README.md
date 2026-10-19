@@ -2,43 +2,53 @@
 
 **Spin the earth, hear the planet.** A Radio Garden–style globe of live
 internet radio: drag the world around, tap a country, and listen to its
-music stations right in the page — no radio hardware, no new tabs.
+music stations right in the page.
 
-This is a full-stack TypeScript app (React + Drizzle + SQLite). The live app
-runs on the hosted artifact runtime; this repo holds the complete source.
+This is the **standalone edition** — clone it and run it anywhere with
+[Bun](https://bun.sh). (There's also a hosted live version; this repo is
+the runnable source.)
+
+## Run it
+
+1. Install Bun: https://bun.sh
+2. Then:
+
+```bash
+git clone https://github.com/NUKIEBOI/world-radio-tuner.git
+cd world-radio-tuner
+bun install
+bun run dev
+```
+
+Open http://localhost:3000 — that's it. Your favorites and directory
+cache live in `tuner.db` (SQLite, created automatically).
 
 ## What it does
 
-- **Spinning globe** — an interactive globe (Meta map runtime, globe
-  projection) with a dot for every country that has stations. Drag to turn
-  the earth, tap a dot to open that country.
-- **Live station directory** — station data comes from
-  [Radio Browser](https://www.radio-browser.info/), the free community-run
-  index of internet radio (~55,000 working stations across ~200 countries).
-  Per country you get its top stations by community votes, filterable by
-  genre (pop, rock, jazz, classical, electronic, latin, folk…), plus a
-  worldwide station search.
-- **In-page player** — streams play directly from each station's own server
-  to your browser. HTTPS streams are ranked first (secure pages can't play
-  plain-http audio), dead streams are skipped automatically, and ⏮/⏭ step
-  through the list. "Surprise me" shuffles a random station from the
-  country you're browsing.
-- **Favorites** — star stations and they stay one tap away.
+- **Spinning globe** — drag the earth, tap a country's dot to open it.
+- **Live station directory** — data from [Radio Browser](https://www.radio-browser.info/),
+  the free community-run index of internet radio (~55,000 working stations
+  across ~200 countries). Top stations per country by community votes,
+  filterable by genre, plus worldwide search and a "Surprise me" shuffle.
+- **In-page player** — streams play straight from each station's own
+  server to your browser. Dead streams are skipped automatically.
+- **Favorites** — star stations; they persist in the local SQLite DB.
+
+## How it's built
+
+- Frontend: React + Tailwind, bundled with `Bun.build` (`bun run build`)
+- Backend: `Bun.serve` + SQLite (`bun:sqlite`) via Drizzle ORM
+- API: `POST /api/<action>` — `getCountries`, `getStations`,
+  `searchStations`, `getFavorites`, `toggleStationFavorite`
 
 ## Project layout
 
 | Path | What it is |
 |---|---|
-| `client/src/` | React frontend (globe, country browser, station panel, player) |
-| `client/src/geo.ts` | Country names + centroid coordinates (mledoze/countries dataset), joined with the live directory by ISO code |
-| `server/src/actions.ts` | Server actions (Radio Browser directory fetch + cache, station lists, search, favorites) |
-| `server/src/schema.ts` | Drizzle schema |
+| `client/src/` | React frontend (globe, station panel, player, search) |
+| `client/src/geo.ts` | Country names + centroid coordinates for the globe |
+| `server/standalone.ts` | HTTP server: API routes + static file serving |
+| `server/actions.ts` | Action implementations (Radio Browser directory logic) |
+| `server/db.ts` | SQLite + Drizzle setup |
+| `server/schema.ts` | Drizzle schema |
 | `drizzle/` | SQL migrations |
-
-## About this repo
-
-This repo holds the complete source of the World Radio Tuner. The app itself
-runs on the hosted Muse artifact runtime (open it from the shared card) — it
-depends on the internal `@hatch/space-sdk` package, so it can't be installed
-and run with a plain `bun install` outside that environment. Clone it to read
-the code or port it.

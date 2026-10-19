@@ -1,15 +1,1 @@
-{
-  "extends": "../tsconfig.base.json",
-  "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
-    "jsx": "react-jsx",
-    "types": ["bun-types", "react", "react-dom"],
-    "rootDir": "..",
-    "tsBuildInfoFile": "./.tsbuildinfo.client",
-    "paths": {
-      "@space/server/*": ["../server/src/*"],
-      "@space/privileged": ["../server/.generated/privileged.contract"]
-    }
-  },
-  "include": ["src/**/*", "../server/src/**/*"]
-}
+{"compilerOptions":{"esModuleInterop":true,"forceConsistentCasingInFileNames":true,"incremental":true,"isolatedModules":true,"jsx":"react-jsx","lib":["ES2022","DOM"],"module":"Preserve","moduleDetection":"force","moduleResolution":"bundler","noEmit":true,"noFallthroughCasesInSwitch":true,"noImplicitAny":true,"noImplicitOverride":true,"noUncheckedIndexedAccess":true,"noUnusedLocals":true,"noUnusedParameters":true,"skipLibCheck":true,"strict":true,"target":"ES2022","tsBuildInfoFile":"./.tsbuildinfo.client","types":["bun-types","react","react-dom"],"verbatimModuleSyntax":true},"extends":"../tsconfig.base.json","include":["src/**/*","../server/**/*"]}

@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SafeAreaTopScrim } from "@hatch/space-sdk/client";
+// Standalone: SafeAreaTopScrim was a hosted-shell chrome helper; a plain
+// env() spacer covers notched mobile browsers here.
+function SafeAreaTopScrim({ backgroundColor }: { backgroundColor: string }) {
+  return (
+    <div
+      aria-hidden
+      style={{
+        backgroundColor,
+        height: "env(safe-area-inset-top, 0px)",
+      }}
+    />
+  );
+}
 import { api, type ApiResponse } from "./api";
 import { COUNTRY_GEO } from "./geo";
 import { GlobeMap, type GlobePlace } from "./GlobeMap";
